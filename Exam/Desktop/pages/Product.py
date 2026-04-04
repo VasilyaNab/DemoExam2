@@ -166,6 +166,9 @@ class Ui_Product(object):
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.Discount = QLabel(Product)
         self.Discount.setObjectName(u"Discount")
+        self.Discount.setMinimumSize(QSize(126, 89))
+        self.Discount.setMaximumSize(QSize(126, 89))
+        self.Discount.setBaseSize(QSize(126, 89))
         self.Discount.setAlignment(Qt.AlignCenter)
 
         self.verticalLayout_2.addWidget(self.Discount)

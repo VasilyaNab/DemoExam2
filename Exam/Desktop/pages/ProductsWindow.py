@@ -40,6 +40,9 @@ class Ui_ProductsWindow(object):
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.Exit = QPushButton(self.centralwidget)
         self.Exit.setObjectName(u"Exit")
+        self.Exit.setMinimumSize(QSize(144, 29))
+        self.Exit.setMaximumSize(QSize(144, 29))
+        self.Exit.setBaseSize(QSize(144, 29))
 
         self.verticalLayout.addWidget(self.Exit)
 

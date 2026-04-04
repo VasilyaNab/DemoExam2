@@ -29,6 +29,24 @@
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
        <widget class="QPushButton" name="Exit">
+        <property name="minimumSize">
+         <size>
+          <width>144</width>
+          <height>29</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>144</width>
+          <height>29</height>
+         </size>
+        </property>
+        <property name="baseSize">
+         <size>
+          <width>144</width>
+          <height>29</height>
+         </size>
+        </property>
         <property name="text">
          <string>Выйти</string>
         </property>
