@@ -17,7 +17,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>ProductsWindow</string>
+   <string>Список товаров</string>
   </property>
   <property name="windowIcon">
    <iconset>

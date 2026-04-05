@@ -124,7 +124,7 @@ class Ui_ProductsWindow(object):
     # setupUi
 
     def retranslateUi(self, ProductsWindow):
-        ProductsWindow.setWindowTitle(QCoreApplication.translate("ProductsWindow", u"ProductsWindow", None))
+        ProductsWindow.setWindowTitle(QCoreApplication.translate("ProductsWindow", u"\u0421\u043f\u0438\u0441\u043e\u043a \u0442\u043e\u0432\u0430\u0440\u043e\u0432", None))
         self.Exit.setText(QCoreApplication.translate("ProductsWindow", u"\u0412\u044b\u0439\u0442\u0438", None))
         self.CreateProduct.setText(QCoreApplication.translate("ProductsWindow", u"\u0421\u043e\u0437\u0434\u0430\u0442\u044c \u043f\u0440\u043e\u0434\u0443\u043a\u0442", None))
         self.Orders.setText(QCoreApplication.translate("ProductsWindow", u"\u0417\u0430\u043a\u0430\u0437\u044b", None))
