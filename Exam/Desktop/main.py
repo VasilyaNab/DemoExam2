@@ -18,14 +18,16 @@ import os
 
 # ===================== Роли =====================
 class Role:
+    ADMIN = ("Администратор",)
+    MANAGER = ("Администратор", "Менеджер")
+
     @staticmethod
     def check_lvl(user):
-        if not user:
-            return 0
-        if user.role == "Администратор":
-            return 2
-        if user.role == "Менеджер":
-            return 1
+        if user:
+            if user.role in Role.ADMIN:
+                return 2
+            elif user.role in Role.MANAGER:
+                return 1
         return 0
 
 
@@ -53,7 +55,7 @@ class MainWindow(QMainWindow):
         ).first()
 
         if not user:
-            QMessageBox.warning(self, "Ошибка", "Неверные данные")
+            QMessageBox.warning(self, "Ошибка", "Такого пользователя не существует")
             return
 
         self.open_products(user)
@@ -103,7 +105,7 @@ class ProductFrame(QFrame):
             ui.Count.setStyleSheet("color:#aaa")
 
         # Картинка
-        pixmap = QPixmap(p.image.name) if p.image and os.path.exists(p.image.name) else QPixmap("picture.png")
+        pixmap = QPixmap(p.image.path) if p.image and os.path.exists(p.image.path) else QPixmap("picture.png")
         ui.Image.setPixmap(pixmap)
         ui.Image.setScaledContents(True)
 
@@ -116,16 +118,16 @@ class ProductFrame(QFrame):
             ui.Delete.hide()
 
     def delete_product(self):
-        if QMessageBox.question(self, "Удаление", "Удалить товар?") == QMessageBox.Yes:
+        if QMessageBox.question(self, "Удаление", "Вы точно хотите удалить этот обьект?") == QMessageBox.Yes:
             if self.product.image:
                 self.product.image.delete()
             self.product.delete()
 
-        self.parents.load_products()
+        self.parents.initialize()
 
     def update_product(self):
         ProductDialog(self.parents.user, self.product).exec()
-        self.parents.load_products()
+        self.parents.initialize()
 
 
 # ===================== Окно товаров =====================
@@ -143,26 +145,22 @@ class ProductsWindow(QMainWindow):
         ui.FIO.setText(str(user) if user else "Гость")
 
         ui.comboBoxFilter.addItems(
-            ["Все категории"] + [c.name for c in Category.objects.all()]
+            ["Все поставщики"] + list(set(p.seller for p in Product.objects.all()))
         )
-        ui.comboBoxSort.addItems([
-            "Без сортировки",
-            "По возрастанию цены",
-            "По убыванию цены"
-        ])
+        ui.comboBoxSort.addItems(["По возрастанию", "По убыванию"])
 
-        ui.Search.textChanged.connect(self.load_products)
-        ui.comboBoxSort.currentIndexChanged.connect(self.load_products)
-        ui.comboBoxFilter.currentIndexChanged.connect(self.load_products)
+        ui.Search.textChanged.connect(self.initialize)
+        ui.comboBoxSort.currentIndexChanged.connect(self.initialize)
+        ui.comboBoxFilter.currentIndexChanged.connect(self.initialize)
         ui.Exit.clicked.connect(self.exit)
         ui.CreateProduct.clicked.connect(self.create_product)
 
         if Role.check_lvl(user) < 2:
             ui.CreateProduct.hide()
 
-        self.load_products()
+        self.initialize()
 
-    def load_products(self):
+    def initialize(self):
         ui = self.ui
 
         layout = ui.scrollAreaWidgetContents.layout() or QVBoxLayout(ui.scrollAreaWidgetContents)
@@ -174,22 +172,32 @@ class ProductsWindow(QMainWindow):
 
         products = Product.objects.all()
 
-        # Поиск
         search = ui.Search.text().lower()
-        if search:
+        sort = ui.comboBoxSort.currentText()
+        filters = ui.comboBoxFilter.currentText()
+
+        # 1. ФИЛЬТР
+        if filters != "Все поставщики":
+            products = products.filter(seller=filters)
+
+        # 2. СОРТИРОВКА
+        if sort == "По возрастанию":
+            products = products.order_by("count")
+        else:
+            products = products.order_by("-count")
+
+        # 3. ПОИСК
+        if search.replace(" ", "") != "":
             products = products.filter(
-                Q(name__icontains=search) | Q(article__icontains=search)
+                Q(name__icontains=search) |
+                Q(article__icontains=search) |
+                Q(description__icontains=search) |
+                Q(supplier__icontains=search) |
+                Q(seller__icontains=search) |
+                Q(price__icontains=search) |
+                Q(count__icontains=search) |
+                Q(discount__icontains=search)
             )
-
-        # Фильтр
-        category = ui.comboBoxFilter.currentText()
-        if category != "Все категории":
-            products = products.filter(category__name=category)
-
-        # Сортировка
-        sort_map = {1: "price", 2: "-price"}
-        if ui.comboBoxSort.currentIndex() in sort_map:
-            products = products.order_by(sort_map[ui.comboBoxSort.currentIndex()])
 
         # Вывод
         for p in products:
@@ -197,7 +205,7 @@ class ProductsWindow(QMainWindow):
 
     def create_product(self):
         ProductDialog(self.user).exec()
-        self.load_products()
+        self.initialize()
 
     def exit(self):
         self.window = MainWindow()
